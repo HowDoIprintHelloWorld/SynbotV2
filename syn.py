@@ -17,7 +17,7 @@ async def dmUser(user, message):
 
 # To do: Make it log to a certain channel
 def log(message):
-  with open("data/log.txt", "a") as log:
+  with open("data/log.txt", "a", encoding="latin-1") as log:
    log.write(f"[{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}]"+message)
 
 @client.event
