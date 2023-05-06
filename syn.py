@@ -1,63 +1,98 @@
 import os
 import discord
 from discord.utils import get
+from discord.ext import commands
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
 client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-async def dmUser(user, message):
-  dmChan = user.dm_channel
-  if dmChan == None:
-    dmChan = await user.create_dm()
-  await dmChan.send(message)
-  
+skid_role_id  = 0   #CHANGE THIS!!!!!!!!!!!!!!!!!!
+mod_role_id   = 0   #CHANGE THIS!!!!!!!!!!!!!!!!!!
+log_channel_id= 0   #CHANGE THIS!!!!!!!!!!!!!!!!!!
 
-# To do: Make it log to a certain channel
-def log(message):
-  with open("data/log.txt", "a", encoding="latin-1") as log:
-   log.write(f"[{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}]"+message)
+try:
+  muted = open("muted_users", "r").read().strip().split("\n")
+except:
+  open("muted_users", "w").write("")
+  muted = []
 
-@client.event
-async def on_ready():
-    print(f'We have logged in as {client.user}')
+async def faq(message):
+        faq_section = """
+```
+______      ____
+|  ____/\   / __ \\
+| |__ /  \ | |  | |
+|  __/ /\ \| |  | |
+| | / ____ \ |__| |
+|_|/_/    \_\___\_\\
 
+"Will you hack person X?": NO, we will not hack anybody because:
+   1.We're not getting involved with your personal life.
+   2.It's illegal.
 
-async def getCommand(message):
-  commands = {"verify":verify, "check-chall":checkChallenge, "time-out":timeOut}
-  if len(message.content) > 1:
-    command = message.content[1:].split()[0]
-    if command in commands.keys():
-      await commands[command](message)
+"Can you hack account X for me?": NO, we will not hack any account because:
+   1.It's impossible without an exploit for the actual website that would probably be worth millions or phishing the person.
+   2.It's illegal.
+   3.It's against the websites TOS.
 
+"How to hack?": There's no "the way" to learn hacking, it's something everybody needs to find themselves. We can teach about a specific subject thought.
 
-@client.event
+"Is X a scam?": How would we know?! Google the brand/company/website and use your common sense.
+```
+      """.strip()
+        await message.channel.send(faq_section)
+
+@bot.event
 async def on_message(message):
-  if message.author == client.user:
-      return
+        words = [
+        "dox",
+        "dos",
+        "deanonymize",
+        "swat",
+        "spam",
+        "bomb",
+        "nigger",
+        "retard",
+        "tranny",
+        "click this",
+        "carding",
+        "free crypto",
+        "free money",
+        "kill you",
+        "kys"
+        ]
+        if str(message.author.id) in muted:
+          await message.delete()
+          return
 
-  if message.content.startswith('!'):
-      await getCommand(message)
+        if skid_role_id in [role.id for role in message.author.roles]:
+          for word in words:
+              if word in message.content.lower():
+                  await message.delete()
+                  await message.channel.send("The user \"" + str(message.author) + "\" has been muted for potentially being a skid, and is waiting for staff approval.")
+                  muted.append(str(message.author.id))
+                  channel = bot.get_channel(log_channel_id)
+                  await channel.send("The user " + str(message.author.id) + " sent message which was flagged:\n " + message.content)
 
-@client.event
-async def on_member_join(member):
-  log(f"New member '{str(member.name)}' joined")
+        if message.content == "!faq":
+            await faq(message)
 
-@client.event
-async def on_member_remove(member):
-  log(f"New member '{str(member.name)}' left")
+        if mod_role_id in [role.id for role in message.author.roles]:
+            if message.content.startswith("!modhelp"):
+                help_page = """
+!unmute user#0001: Unmute muted user.
+                """.strip()
+                await message.channel.send(help_page)
+            elif message.content.startswith("!unmute"):
+                muted.remove(''.join(message.content.split("!unmute")[1:]))
 
-@client.event
-async def on_member_update(before, after):
-  print("Member updated")
-  log(f"Member '{str(before)}' changed to '{str(after)}'")
-
-
-@client.event
-async def on_reaction_add(reaction, user):
-  pass
+        if muted != open("muted_users", "rb").read().strip().split(b"\n"):
+            open("muted_users", "w").write('\n'.join(muted))
 
 tok = os.environ['key']
-client.run(tok)
+print(tok)
+bot.run(tok)
