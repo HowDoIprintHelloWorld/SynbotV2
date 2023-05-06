@@ -84,11 +84,16 @@ async def on_message(message):
         if mod_role_id in [role.id for role in message.author.roles]:
             if message.content.startswith("!modhelp"):
                 help_page = """
-!unmute user#0001: Unmute muted user.
+!unmute userid: Unmute muted user.
+!mute userid: Mute a user
                 """.strip()
                 await message.channel.send(help_page)
             elif message.content.startswith("!unmute"):
-                muted.remove(''.join(message.content.split("!unmute")[1:]))
+                muted.remove(''.join(message.content.split("!unmute")[1:]).strip())
+                await message.channel.send("The user \"" + ''.join(message.content.split("!unmute")[1:]).strip() + "\" has been unmuted by the staff!")
+            elif message.content.startswith("!mute"):
+                muted.append(''.join(message.content.split("!mute")[1:]).strip())
+                await message.channel.send("The user \"" + ''.join(message.content.split("!mute")[1:]).strip() + "\" has been muted by staff.")
 
         if muted != open("muted_users", "rb").read().strip().split(b"\n"):
             open("muted_users", "w").write('\n'.join(muted))
