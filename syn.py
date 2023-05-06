@@ -63,7 +63,8 @@ async def on_message(message):
         "free crypto",
         "free money",
         "kill you",
-        "kys"
+        "kys",
+        "services"
         ]
         if str(message.author.id) in muted:
           await message.delete()
