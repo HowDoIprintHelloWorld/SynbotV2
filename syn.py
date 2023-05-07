@@ -1,5 +1,6 @@
 import os
 import discord
+import time
 from discord.utils import get
 from discord.ext import commands
 
@@ -25,6 +26,8 @@ try:
 except:
   open("reps", "w").write("")
   reps = []
+
+last_rep = []
 
 async def faq(message):
         faq_section = """
@@ -133,12 +136,36 @@ async def on_message(message):
 
         elif message.content.startswith("!addrep"):
             to_rep = int(message.content.split("!addrep")[1].strip())
+            try:
+              index_loc = reps.index(str(message.author.id))
+              if int(reps[index_loc+1]) < 5:
+                await message.channel.send("You have to have 5 or more rep to give rep.")
+                return
+            except:
+                await message.channel.send("You have to have 5 or more rep to give rep.")
+                return
+
+            try:
+              index_loc = last_rep.index(message.author.id)
+              if time.time() - last_rep[index_loc+1] < 300:
+                await message.channel.send("Hold your horses! Only (-/+)1 rep per 5 minutes.")
+                return
+            except:
+              last_rep.append(message.author.id)
+              last_rep.append(0)
+
             if message.author.id == to_rep or to_rep == bot.user.id:
                 return
             try:
+              user = await bot.fetch_user(to_rep)
               index_loc = reps.index(str(to_rep))
               reps[index_loc+1] = str(int(reps[index_loc+1])+1)
-            except:
+              index_loc = last_rep.index(message.author.id)
+              last_rep[index_loc+1] = time.time()
+              channel = bot.get_channel(log_channel_id)
+              await channel.send("The user " + str(message.author) + " +rep user: " + str(user))
+            except Exception as e:
+              print(e)
               try:
                 name = await bot.fetch_user(to_rep)
                 print("Name:" + str(name))
@@ -148,23 +175,67 @@ async def on_message(message):
                 await message.channel.send("The user:" + str(to_rep) + " doesn't exist.")
 
         elif message.content == "+rep":
+            try:
+              index_loc = reps.index(str(message.author.id))
+              if int(reps[index_loc+1]) < 5:
+                await message.channel.send("You have to have 5 or more rep to give rep.")
+                return
+            except:
+                await message.channel.send("You have to have 5 or more rep to give rep.")
+                return
+
+            try:
+              index_loc = last_rep.index(message.author.id)
+              if time.time() - last_rep[index_loc+1] < 300:
+                await message.channel.send("Hold your horses! Only (-/+)1 rep per 5 minutes.")
+                return
+            except:
+              last_rep.append(message.author.id)
+              last_rep.append(0)
+
             reply_to = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             if message.author.id == reply_to.author.id or reply_to.author.id == bot.user.id:
                 return
             try:
               index_loc = reps.index(str(reply_to.author.id))
               reps[index_loc+1] = str(int(reps[index_loc+1])+1)
+              index_loc = last_rep.index(message.author.id)
+              last_rep[index_loc+1] = time.time()
+              channel = bot.get_channel(log_channel_id)
+              await channel.send("The user " + str(message.author) + " +rep user: " + str(reply_to.author) + " reply to message:\n" + str(reply_to.content))
             except:
               reps.append(str(reply_to.author.id))
               reps.append(str(1))
 
         elif message.content == "-rep":
+            try:
+              index_loc = reps.index(str(message.author.id))
+              if int(reps[index_loc+1]) < 5:
+                await message.channels.end("You have to have 5 or more to take rep.")
+                return
+            except:
+                await message.channels.end("You have to have 5 or more to take rep.")
+                return
+
+            try:
+              index_loc = last_rep.index(message.author.id)
+              if time.time() - last_rep[index_loc+1] < 300:
+                await message.channel.send("Hold your horses! Only (-/+)1 rep per 5 minutes.")
+                return
+            except:
+              last_rep.append(message.author.id)
+              last_rep.append(0)
+
             reply_to = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             if message.author.id == reply_to.author.id or reply_to.author.id == bot.user.id:
                 return
             try:
               index_loc = reps.index(str(reply_to.author.id))
               reps[index_loc+1] = str(int(reps[index_loc+1])-1)
+              index_loc = last_rep.index(message.author.id)
+              last_rep[index_loc+1] = time.time()
+              channel = bot.get_channel(log_channel_id)
+              await channel.send("The user " + str(message.author) + " -rep user: " + str(reply_to.author) + " reply to message:\n" + str(reply_to.content))
             except:
               reps.append(str(reply_to.author.id))
               reps.append(str(-1))
@@ -186,6 +257,7 @@ async def on_message(message):
         if muted != open("muted_users", "rb").read().strip().split(b"\n"):
             open("muted_users", "w").write('\n'.join(muted))
         print(reps)
+        print(last_rep)
         if '\n'.join(reps) != open("reps", "r").read().strip().split("\n"):
             open("reps", "w").write('\n'.join(reps))
 
