@@ -190,8 +190,7 @@ What tech-related skill do you want to learn or improve upon in the future?
               last_rep[index_loc+1] = time.time()
               channel = bot.get_channel(log_channel_id)
               await channel.send("The user " + str(message.author) + " +rep user: " + str(user))
-            except Exception as e:
-              print(e)
+            except:
               try:
                 name = await bot.fetch_user(to_rep)
                 print("Name:" + str(name))
@@ -274,16 +273,16 @@ What tech-related skill do you want to learn or improve upon in the future?
                 """.strip()
                 await message.channel.send(mod_help_page)
             elif message.content.startswith("!unmute"):
+                user = await bot.fetch_user(int(''.join(message.content.split("!unmute")[1:]).strip()))
                 muted.remove(''.join(message.content.split("!unmute")[1:]).strip())
-                await message.channel.send("The user \"" + ''.join(message.content.split("!unmute")[1:]).strip() + "\" has been unmuted by the staff!")
+                await message.channel.send("The user \"" + str(user) + "\" has been unmuted by the staff!")
             elif message.content.startswith("!mute"):
+                user = await bot.fetch_user(int(''.join(message.content.split("!mute")[1:]).strip()))
                 muted.append(''.join(message.content.split("!mute")[1:]).strip())
-                await message.channel.send("The user \"" + ''.join(message.content.split("!mute")[1:]).strip() + "\" has been muted by staff.")
+                await message.channel.send("The user \"" + str(user) + "\" has been muted by staff.")
 
         if muted != open("muted_users", "rb").read().strip().split(b"\n"):
             open("muted_users", "w").write('\n'.join(muted))
-        print(reps)
-        print(last_rep)
         if '\n'.join(reps) != open("reps", "r").read().strip().split("\n"):
             open("reps", "w").write('\n'.join(reps))
 
