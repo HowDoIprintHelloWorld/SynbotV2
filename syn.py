@@ -3,6 +3,7 @@ import discord
 import time
 from discord.utils import get
 from discord.ext import commands
+import random
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -69,7 +70,11 @@ _    _ ______ _      _____
 
 -rep: Reply to a message with this command and the user will get -1 reputation.
 
+!addrep <user id>: Adds +1 rep to the user whose user id you enter.
+
 !rep *<user id>: If no user id is provided it displays your own reputation and if one is provided, it displays the users reputation.
+
+!icebreaker: Generates a random question to get the conversation going.
 
 !help: Displays this.
 
@@ -114,6 +119,27 @@ async def on_message(message):
 
         if message.content == "!help":
             await help_page(message)
+
+        elif message.content == "!icebreaker":
+            icebreakers = """
+What inspired you to pursue a career in tech?
+What's the coolest tech project you've ever worked on?
+What programming language do you find most challenging to learn, and why?
+What's your favorite tech gadget or tool that you can't live without?
+What tech trend are you most excited about right now?
+What's your go-to source for tech news and updates?
+If you could build any app, what would it be and why?
+What's the most interesting tech-related article you've read recently?
+What do you think will be the biggest tech breakthrough in the next decade?
+What's the most frustrating tech problem you've ever had to solve?
+What's the most unique application of technology that you've seen?
+If you could choose to be an expert in any tech field, what would it be?
+What's your favorite coding language and why?
+What's the most innovative tech company in your opinion?
+What tech-related skill do you want to learn or improve upon in the future?
+
+""".strip().split("\n")
+            await message.channel.send(random.choice(icebreakers))
 
         elif message.content == "!faq":
             await faq(message)
